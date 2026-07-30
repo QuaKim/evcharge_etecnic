@@ -42,15 +42,18 @@ class EVchargeBaseSensor(CoordinatorEntity, SensorEntity):
         self._entry = entry
         self._station_name = station_name
         self._station_id = station_data.get("id", entry.entry_id)
+        # Extraemos la potencia global (ej. 50, 22, 100)
+        self._power = station_data.get("power", "")
 
     @property
     def device_info(self) -> DeviceInfo:
-        """Agrupa automáticamente todas las entidades bajo el mismo Dispositivo."""
+        """Agrupa automáticamente todas las entidades bajo el mismo Dispositivo con la potencia en el título."""
+        power_str = f" ({self._power} kW)" if self._power else ""
         return DeviceInfo(
             identifiers={(DOMAIN, str(self._station_id))},
-            name=f"EVcharge {self._station_name}",
+            name=f"EVcharge {self._station_name}{power_str}",
             manufacturer="Etecnic / EVcharge",
-            model="Punto de Recarga EV",
+            model=f"Punto de Recarga EV{power_str}",
         )
 
     def _get_station_data(self):
@@ -66,7 +69,9 @@ class EVchargeStationSensor(EVchargeBaseSensor):
 
     def __init__(self, coordinator, entry, station_name, station_data):
         super().__init__(coordinator, entry, station_name, station_data)
-        self._attr_name = "Estado Global"
+        # Incluimos la potencia en el nombre de la entidad principal
+        power_str = f" {self._power} kW" if self._power else ""
+        self._attr_name = f"Estado Global ({self._power} kW)" if self._power else "Estado Global"
         self._attr_unique_id = f"evcharge_{entry.entry_id}_main"
         self._attr_icon = "mdi:ev-station"
 
