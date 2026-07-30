@@ -1,4 +1,4 @@
-"""Inicialización de la integración EVcharge."""
+"""Inicialización de la integración EVcharge (Etecnic)."""
 from datetime import timedelta
 import logging
 import aiohttp
@@ -12,24 +12,27 @@ from .const import DOMAIN, URL_INDEX
 
 _LOGGER = logging.getLogger(__name__)
 
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+}
+
 PLATFORMS = ["sensor"]
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Configura la entrada de datos."""
+    """Configura la integración desde una entrada de configuración."""
     session = async_get_clientsession(hass)
 
     async def async_update_data():
         """Descarga el JSON general de cargadores."""
         try:
-            async with session.get(URL_INDEX) as response:
+            async with session.get(URL_INDEX, headers=HEADERS, timeout=15) as response:
                 if response.status != 200:
                     raise UpdateFailed(f"Error HTTP: {response.status}")
                 return await response.json(content_type=None)
         except Exception as err:
             raise UpdateFailed(f"Error de conexión con Etecnic: {err}")
 
-    # Actualiza cada 3 minutos para no sobrecargar el servidor
     coordinator = DataUpdateCoordinator(
         hass,
         _LOGGER,
