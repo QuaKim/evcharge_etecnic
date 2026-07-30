@@ -1,0 +1,20 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Añadir Cargador EVcharge",
+        "description": "Introduce el nombre exacto del cargador tal y como aparece en la web o app.",
+        "data": {
+          "station_name": "Nombre de la estación"
+        }
+      }
+    },
+    "error": {
+      "not_found": "No se ha encontrado ninguna estación con ese nombre.",
+      "cannot_connect": "Error al conectar con el servidor de Etecnic."
+    },
+    "abort": {
+      "already_configured": "Esta estación ya está configurada."
+    }
+  }
+}
