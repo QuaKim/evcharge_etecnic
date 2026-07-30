@@ -1,6 +1,7 @@
 """Plataforma de sensores para EVcharge (Etecnic)."""
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
+from homeassistant.helpers.entity import DeviceInfo
 
 from .const import CONF_STATION_NAME, DOMAIN, STATUS_MAP
 
@@ -20,28 +21,40 @@ async def async_setup_entry(hass, entry, async_add_entities):
             break
 
     if station_data:
-        # Sensor principal de la estación
-        entities.append(EVchargeStationSensor(coordinator, entry, station_name))
+        # 1. Sensor principal de la estación (Estado Global)
+        entities.append(EVchargeStationSensor(coordinator, entry, station_name, station_data))
 
-        # Sensores individuales por cada toma / socket
+        # 2. Sensores individuales por cada toma / socket
         for socket in station_data.get("charger_sockets", []):
             socket_num = socket.get("socket_number", 1)
             entities.append(
-                EVchargeSocketSensor(coordinator, entry, station_name, socket_num)
+                EVchargeSocketSensor(coordinator, entry, station_name, station_data, socket_num)
             )
 
     async_add_entities(entities)
 
 
 class EVchargeBaseSensor(CoordinatorEntity, SensorEntity):
-    """Clase base para sensores EVcharge."""
+    """Clase base para todos los sensores de EVcharge."""
 
-    def __init__(self, coordinator, entry, station_name):
+    def __init__(self, coordinator, entry, station_name, station_data):
         super().__init__(coordinator)
         self._entry = entry
         self._station_name = station_name
+        self._station_id = station_data.get("id", entry.entry_id)
+
+    @property
+    def device_info(self) -> DeviceInfo:
+        """Agrupa automáticamente todas las entidades bajo el mismo Dispositivo."""
+        return DeviceInfo(
+            identifiers={(DOMAIN, str(self._station_id))},
+            name=f"EVcharge {self._station_name}",
+            manufacturer="Etecnic / EVcharge",
+            model="Punto de Recarga EV",
+        )
 
     def _get_station_data(self):
+        """Obtiene la información actualizada del cargador desde el coordinador."""
         for item in self.coordinator.data or []:
             if self._station_name.lower() in item.get("name", "").lower():
                 return item
@@ -51,9 +64,9 @@ class EVchargeBaseSensor(CoordinatorEntity, SensorEntity):
 class EVchargeStationSensor(EVchargeBaseSensor):
     """Sensor principal del estado global del cargador."""
 
-    def __init__(self, coordinator, entry, station_name):
-        super().__init__(coordinator, entry, station_name)
-        self._attr_name = f"EVcharge {station_name}"
+    def __init__(self, coordinator, entry, station_name, station_data):
+        super().__init__(coordinator, entry, station_name, station_data)
+        self._attr_name = "Estado Global"
         self._attr_unique_id = f"evcharge_{entry.entry_id}_main"
         self._attr_icon = "mdi:ev-station"
 
@@ -84,10 +97,10 @@ class EVchargeStationSensor(EVchargeBaseSensor):
 class EVchargeSocketSensor(EVchargeBaseSensor):
     """Sensor para cada toma de corriente independiente."""
 
-    def __init__(self, coordinator, entry, station_name, socket_num):
-        super().__init__(coordinator, entry, station_name)
+    def __init__(self, coordinator, entry, station_name, station_data, socket_num):
+        super().__init__(coordinator, entry, station_name, station_data)
         self._socket_num = socket_num
-        self._attr_name = f"EVcharge {station_name} - Toma {socket_num}"
+        self._attr_name = f"Toma {socket_num}"
         self._attr_unique_id = f"evcharge_{entry.entry_id}_socket_{socket_num}"
         self._attr_icon = "mdi:power-plug-charging"
 
