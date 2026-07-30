@@ -42,13 +42,32 @@ class EVchargeBaseSensor(CoordinatorEntity, SensorEntity):
         self._entry = entry
         self._station_name = station_name
         self._station_id = station_data.get("id", entry.entry_id)
-        # Extraemos la potencia global (ej. 50, 22, 100)
-        self._power = station_data.get("power", "")
+        
+        # Cálculo de la potencia real en kW desde los Amperios del JSON
+        self._power_kw = self._calculate_kw(station_data)
+
+    def _calculate_kw(self, station_data):
+        """Convierte la intensidad (power en Amperios) y fases a kW reales."""
+        if not station_data:
+            return None
+            
+        raw_amps = station_data.get("power", 0)
+        phases = station_data.get("phases", 3)
+        
+        try:
+            amps_float = float(raw_amps)
+            if amps_float <= 0:
+                return None
+            # Fórmula: (Amperios * 230V * Fases) / 1000
+            kw = round((amps_float * 230 * phases) / 1000, 1)
+            return kw
+        except (ValueError, TypeError):
+            return None
 
     @property
     def device_info(self) -> DeviceInfo:
         """Agrupa automáticamente todas las entidades bajo el mismo Dispositivo con la potencia en el título."""
-        power_str = f" ({self._power} kW)" if self._power else ""
+        power_str = f" ({self._power_kw} kW)" if self._power_kw else ""
         return DeviceInfo(
             identifiers={(DOMAIN, str(self._station_id))},
             name=f"EVcharge {self._station_name}{power_str}",
@@ -69,9 +88,8 @@ class EVchargeStationSensor(EVchargeBaseSensor):
 
     def __init__(self, coordinator, entry, station_name, station_data):
         super().__init__(coordinator, entry, station_name, station_data)
-        # Incluimos la potencia en el nombre de la entidad principal
-        power_str = f" {self._power} kW" if self._power else ""
-        self._attr_name = f"Estado Global ({self._power} kW)" if self._power else "Estado Global"
+        # Añade los kW reales al nombre del sensor principal
+        self._attr_name = f"Estado Global ({self._power_kw} kW)" if self._power_kw else "Estado Global"
         self._attr_unique_id = f"evcharge_{entry.entry_id}_main"
         self._attr_icon = "mdi:ev-station"
 
@@ -91,7 +109,8 @@ class EVchargeStationSensor(EVchargeBaseSensor):
         return {
             "id": data.get("id"),
             "address": data.get("address"),
-            "power_kw": data.get("power"),
+            "max_amps": data.get("power"),
+            "calculated_power_kw": self._power_kw,
             "phases": data.get("phases"),
             "latitude": data.get("lat"),
             "longitude": data.get("lon"),
