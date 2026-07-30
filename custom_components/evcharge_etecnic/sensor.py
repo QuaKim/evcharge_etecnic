@@ -102,27 +102,57 @@ class EVchargeSocketSensor(EVchargeBaseSensor):
         self._socket_num = socket_num
         self._attr_name = f"Toma {socket_num}"
         self._attr_unique_id = f"evcharge_{entry.entry_id}_socket_{socket_num}"
-        self._attr_icon = "mdi:power-plug-charging"
+
+    def _get_socket_data(self):
+        """Obtiene la información específica de esta toma."""
+        data = self._get_station_data()
+        if data:
+            for s in data.get("charger_sockets", []):
+                if s.get("socket_number") == self._socket_num:
+                    return s
+        return None
 
     @property
     def native_value(self):
-        data = self._get_station_data()
-        if data:
-            sockets = data.get("charger_sockets", [])
-            for s in sockets:
-                if s.get("socket_number") == self._socket_num:
-                    return STATUS_MAP.get(s.get("status"), "Desconocido")
+        socket = self._get_socket_data()
+        if socket:
+            return STATUS_MAP.get(socket.get("status"), "Desconocido")
         return "Desconocido"
 
     @property
+    def icon(self):
+        """Icono dinámico según estado."""
+        socket = self._get_socket_data()
+        if socket:
+            status = socket.get("status")
+            if status == 0:  # Disponible
+                return "mdi:power-plug-charging"
+            elif status == 1:  # Ocupado
+                return "mdi:power-plug-off"
+            elif status == 9:  # No disponible / Mantenimiento
+                return "mdi:power-plug-outline"
+        return "mdi:power-plug"
+
+    @property
+    def icon_color(self):
+        """Color dinámico según estado para dashboards compatibles (Mushroom, etc.)."""
+        socket = self._get_socket_data()
+        if socket:
+            status = socket.get("status")
+            if status == 0:  # Disponible -> Verde
+                return "var(--success-color, green)"
+            elif status == 1:  # Ocupado -> Rojo
+                return "var(--error-color, red)"
+            elif status == 9:  # No disponible -> Gris / Naranja
+                return "var(--disabled-text-color, grey)"
+        return "var(--disabled-text-color, grey)"
+
+    @property
     def extra_state_attributes(self):
-        data = self._get_station_data()
-        if data:
-            sockets = data.get("charger_sockets", [])
-            for s in sockets:
-                if s.get("socket_number") == self._socket_num:
-                    return {
-                        "socket_id": s.get("id"),
-                        "connector_type_id": s.get("connector_type_id"),
-                    }
-        return {}
+        socket = self._get_socket_data()
+        if not socket:
+            return {}
+        return {
+            "socket_id": socket.get("id"),
+            "connector_type_id": socket.get("connector_type_id"),
+        }
