@@ -1,165 +1,91 @@
-"""Plataforma de sensores para EVcharge (Etecnic)."""
-from homeassistant.components.sensor import SensorEntity
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
-from homeassistant.helpers.entity import DeviceInfo
+"""Flow de configuración para EVcharge (Etecnic)."""
+import logging
+import voluptuous as vol
 
-from .const import DOMAIN, STATUS_MAP
+from homeassistant import config_entries
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-# Asegúrate de importar o definir CONF_STATION_ID
-CONF_STATION_ID = "station_id"
+# Solo importamos el DOMAIN para garantizar la conexión
+from .const import DOMAIN
+
+_LOGGER = logging.getLogger(__name__)
+
+# URL directa de la API de Etecnic para evitar fallos de importación
+URL_INDEX = "https://evcharge.etecnic.tech/api/v2/chargers/index.json"
+
+# Claves internas para las entradas de configuración
 CONF_STATION_NAME = "station_name"
+CONF_STATION_ID = "station_id"
 
 
-async def async_setup_entry(hass, entry, async_add_entities):
-    """Añade los sensores basados en el cargador elegido."""
-    coordinator = hass.data[DOMAIN][entry.entry_id]
-    
-    # Leemos el ID y el Nombre guardados en la entrada de configuración
-    station_id = str(entry.data.get(CONF_STATION_ID, ""))
-    station_name = entry.data.get(CONF_STATION_NAME, "")
+class EVchargeConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
+    """Maneja el flujo de configuración de EVcharge."""
 
-    entities = []
+    VERSION = 1
 
-    # 1. Buscar la estación por ID (o por Nombre como fallback si venías de una versión antigua)
-    station_data = None
-    for item in coordinator.data or []:
-        item_id = str(item.get("id", ""))
-        item_name = item.get("name", "").strip().lower()
+    async def async_step_user(self, user_input=None):
+        """Paso inicial cuando el usuario añade la integración."""
+        errors = {}
 
-        # Prioridad absoluta: buscar por ID único
-        if station_id and item_id == station_id:
-            station_data = item
-            break
-        # Fallback: si no hay ID guardado, buscar por coincidencia exacta de nombre
-        elif not station_id and item_name == station_name.strip().lower():
-            station_data = item
-            break
+        if user_input is not None:
+            user_selection = user_input.get(CONF_STATION_NAME, "").strip()
 
-    # 2. Crear entidades solo si encontramos los datos del cargador
-    if station_data:
-        # Sensor principal de la estación (Estado Global)
-        entities.append(EVchargeStationSensor(coordinator, entry, station_data))
+            try:
+                session = async_get_clientsession(self.hass)
+                async with session.get(URL_INDEX) as response:
+                    if response.status == 200:
+                        data = await response.json(content_type=None)
+                        target_item = None
 
-        # Sensores individuales por cada toma / socket
-        for socket in station_data.get("charger_sockets", []):
-            socket_num = socket.get("socket_number", 1)
-            entities.append(
-                EVchargeSocketSensor(coordinator, entry, station_data, socket_num)
-            )
+                        # 1. Buscar si introdujo un ID numérico exacto
+                        for item in data:
+                            if str(item.get("id")) == user_selection:
+                                target_item = item
+                                break
 
-    async_add_entities(entities)
+                        # 2. Buscar si introdujo un Nombre exacto
+                        if not target_item:
+                            for item in data:
+                                if item.get("name", "").strip().lower() == user_selection.lower():
+                                    target_item = item
+                                    break
 
+                        # 3. Coincidencia parcial (fallback)
+                        if not target_item:
+                            for item in data:
+                                if user_selection.lower() in item.get("name", "").lower():
+                                    target_item = item
+                                    break
 
-class EVchargeBaseSensor(CoordinatorEntity, SensorEntity):
-    """Clase base para todos los sensores de EVcharge."""
+                        if target_item:
+                            station_id = str(target_item.get("id"))
+                            station_name = target_item.get("name", user_selection)
 
-    def __init__(self, coordinator, entry, station_data):
-        super().__init__(coordinator)
-        self._entry = entry
-        self._station_id = str(station_data.get("id"))
-        self._station_name = station_data.get("name", "Cargador EV")
-        
-        # Cálculo de la potencia real en kW
-        self._power_kw = self._calculate_kw(station_data)
+                            # Evitar duplicados asignando el ID único
+                            await self.async_set_unique_id(f"evcharge_{station_id}")
+                            self._abort_if_unique_id_configured()
 
-    def _calculate_kw(self, station_data):
-        """Convierte la intensidad (power en Amperios) y fases a kW reales."""
-        if not station_data:
-            return None
-            
-        raw_amps = station_data.get("power", 0)
-        phases = station_data.get("phases", 3)
-        
-        try:
-            amps_float = float(raw_amps)
-            if amps_float <= 0:
-                return None
-            return round((amps_float * 230 * phases) / 1000, 1)
-        except (ValueError, TypeError):
-            return None
+                            return self.async_create_entry(
+                                title=station_name,
+                                data={
+                                    CONF_STATION_ID: station_id,
+                                    CONF_STATION_NAME: station_name,
+                                },
+                            )
+                        else:
+                            errors["base"] = "not_found"
+                    else:
+                        errors["base"] = "cannot_connect"
+            except Exception as err:
+                _LOGGER.error("Error en config_flow de EVcharge: %s", err)
+                errors["base"] = "cannot_connect"
 
-    @property
-    def device_info(self) -> DeviceInfo:
-        """Agrupa automáticamente todas las entidades bajo el mismo Dispositivo."""
-        power_str = f" ({self._power_kw} kW)" if self._power_kw else ""
-        return DeviceInfo(
-            identifiers={(DOMAIN, self._station_id)},
-            name=f"EVcharge {self._station_name}{power_str}",
-            manufacturer="Etecnic / EVcharge",
-            model=f"Punto de Recarga EV{power_str}",
+        schema = vol.Schema(
+            {
+                vol.Required(CONF_STATION_NAME): str,
+            }
         )
 
-    def _get_station_data(self):
-        """Obtiene la información actualizada del cargador desde el coordinador usando el ID."""
-        for item in self.coordinator.data or []:
-            if str(item.get("id")) == self._station_id:
-                return item
-        return None
-
-
-class EVchargeStationSensor(EVchargeBaseSensor):
-    """Sensor principal del estado global del cargador."""
-
-    def __init__(self, coordinator, entry, station_data):
-        super().__init__(coordinator, entry, station_data)
-        self._attr_name = f"Estado Global ({self._power_kw} kW)" if self._power_kw else "Estado Global"
-        self._attr_unique_id = f"evcharge_{self._station_id}_main"
-        self._attr_icon = "mdi:ev-station"
-
-    @property
-    def native_value(self):
-        data = self._get_station_data()
-        if data:
-            status_code = data.get("status", 9)
-            return STATUS_MAP.get(status_code, "Desconocido")
-        return "Desconocido"
-
-    @property
-    def extra_state_attributes(self):
-        data = self._get_station_data()
-        if not data:
-            return {}
-        return {
-            "id": data.get("id"),
-            "address": data.get("address"),
-            "max_amps": data.get("power"),
-            "calculated_power_kw": self._power_kw,
-            "phases": data.get("phases"),
-            "latitude": data.get("lat"),
-            "longitude": data.get("lon"),
-            "sockets_count": len(data.get("charger_sockets", [])),
-        }
-
-
-class EVchargeSocketSensor(EVchargeBaseSensor):
-    """Sensor para cada toma de corriente independiente."""
-
-    def __init__(self, coordinator, entry, station_data, socket_num):
-        super().__init__(coordinator, entry, station_data)
-        self._socket_num = socket_num
-        self._attr_name = f"Toma {socket_num}"
-        self._attr_unique_id = f"evcharge_{self._station_id}_socket_{socket_num}"
-        self._attr_icon = "mdi:power-plug-charging"
-
-    @property
-    def native_value(self):
-        data = self._get_station_data()
-        if data:
-            sockets = data.get("charger_sockets", [])
-            for s in sockets:
-                if s.get("socket_number") == self._socket_num:
-                    return STATUS_MAP.get(s.get("status"), "Desconocido")
-        return "Desconocido"
-
-    @property
-    def extra_state_attributes(self):
-        data = self._get_station_data()
-        if data:
-            sockets = data.get("charger_sockets", [])
-            for s in sockets:
-                if s.get("socket_number") == self._socket_num:
-                    return {
-                        "socket_id": s.get("id"),
-                        "connector_type_id": s.get("connector_type_id"),
-                    }
-        return {}
+        return self.async_show_form(
+            step_id="user", data_schema=schema, errors=errors
+        )
