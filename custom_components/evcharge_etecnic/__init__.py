@@ -1,57 +1,46 @@
 """Inicialización de la integración EVcharge (Etecnic)."""
-from datetime import timedelta
 import logging
-import aiohttp
-
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.aiohttp_client import async_get_clientsession
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-from .const import DOMAIN, URL_INDEX
+from .const import DOMAIN
+# Asumiendo que tu clase Coordinator está en un archivo coordinator.py
+from .coordinator import EtecnicDataUpdateCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
-HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-}
-
-PLATFORMS = ["sensor"]
+# Definimos las plataformas que vamos a cargar
+PLATFORMS: list[Platform] = [Platform.SENSOR]
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Configura la integración desde una entrada de configuración."""
-    session = async_get_clientsession(hass)
+    """Configurar EVcharge desde una entrada creada por el usuario (Config Flow)."""
+    hass.data.setdefault(DOMAIN, {})
 
-    async def async_update_data():
-        """Descarga el JSON general de cargadores."""
-        try:
-            async with session.get(URL_INDEX, headers=HEADERS, timeout=15) as response:
-                if response.status != 200:
-                    raise UpdateFailed(f"Error HTTP: {response.status}")
-                return await response.json(content_type=None)
-        except Exception as err:
-            raise UpdateFailed(f"Error de conexión con Etecnic: {err}")
+    # 1. Instanciar el Coordinator para las peticiones a la API
+    coordinator = EtecnicDataUpdateCoordinator(hass, entry)
 
-    coordinator = DataUpdateCoordinator(
-        hass,
-        _LOGGER,
-        name="evcharge_etecnic_coordinator",
-        update_method=async_update_data,
-        update_interval=timedelta(minutes=3),
-    )
-
+    # 2. Hacer la primera llamada a la API antes de cargar nada
+    # Esto asegura que tengamos datos listos cuando los sensores se creen
     await coordinator.async_config_entry_first_refresh()
 
-    hass.data.setdefault(DOMAIN, {})[entry.entry_id] = coordinator
+    # 3. Guardar el coordinator en la memoria de HA
+    hass.data[DOMAIN][entry.entry_id] = coordinator
 
+    # 4. CARGA DINÁMICA: Envía la señal a HA para que cargue sensor.py INMEDIATAMENTE
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+
     return True
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Elimina la entrada cuando se borra el dispositivo."""
-    unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+    """Descargar una entrada al eliminar el cargador de Home Assistant."""
+    # Descarga las plataformas (elimina los sensores dinámicamente)
+    unload_ok = await hass.config_entries.async_forward_entry_unload(entry, PLATFORMS)
+    
+    # Limpia los datos de memoria
     if unload_ok:
         hass.data[DOMAIN].pop(entry.entry_id)
+
     return unload_ok
