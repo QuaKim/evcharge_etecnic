@@ -2,7 +2,9 @@
 
 DOMAIN = "evcharge_etecnic"
 URL_INDEX = "https://etecnic.net/api/v1/chargers/index.json"
+
 CONF_STATION_NAME = "station_name"
+CONF_STATION_ID = "station_id"
 
 STATUS_MAP = {
     0: "Disponible",
