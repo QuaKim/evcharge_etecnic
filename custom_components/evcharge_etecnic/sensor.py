@@ -154,28 +154,55 @@ class EVchargeSocketSensor(EVchargeBaseSensor):
         connector_type_id: int = None,
     ) -> None:
         super().__init__(coordinator, entry, station_name, station_id)
-        self._socket_num = socket_num
+        self._socket_num = int(socket_num)
         self._connector_type_id = connector_type_id
 
         conn_name = CONNECTOR_TYPES.get(connector_type_id) if connector_type_id else None
         suffix = f" ({conn_name})" if conn_name else ""
 
-        self._attr_name = f"Toma {socket_num}{suffix}"
-        self._attr_unique_id = f"evcharge_{self._station_id}_socket_{socket_num}"
+        self._attr_name = f"Toma {self._socket_num}{suffix}"
+        self._attr_unique_id = f"evcharge_{self._station_id}_socket_{self._socket_num}"
+
+    def _get_socket_data(self):
+        """Método auxiliar para obtener la información específica de esta toma."""
+        station_data = self._get_station_data()
+        if station_data:
+            sockets = station_data.get("charger_sockets", [])
+            for s in sockets:
+                # Comparamos convirtiendo ambos a int por seguridad
+                if int(s.get("socket_number", 0)) == self._socket_num:
+                    return s
+        return None
+
+    @property
+    def native_value(self):
+        """Devuelve el estado traducido de la toma."""
+        socket_data = self._get_socket_data()
+        if socket_data is not None:
+            status_code = socket_data.get("status")
+            return STATUS_MAP.get(status_code, f"Desconocido ({status_code})")
+        return "Cargando..."
 
     @property
     def icon(self):
-        """Devuelve el icono adecuado según el tipo de conector y el estado."""
-        data = self._get_station_data()
+        """Devuelve el icono adecuado según el tipo de conector."""
+        socket_data = self._get_socket_data()
         type_id = self._connector_type_id
 
-        # Intentamos obtener el type_id fresco si el sensor ya tiene datos del coordinador
-        if data:
-            sockets = data.get("charger_sockets", [])
-            for s in sockets:
-                if s.get("socket_number") == self._socket_num:
-                    type_id = s.get("connector_type_id", self._connector_type_id)
-                    break
+        if socket_data and "connector_type_id" in socket_data:
+            type_id = socket_data.get("connector_type_id")
 
-        # Devuelve el icono del conector o un icono de enchufe de carga por defecto
         return CONNECTOR_ICONS.get(type_id, "mdi:power-plug-charging")
+
+    @property
+    def extra_state_attributes(self):
+        """Devuelve los atributos extra de la toma."""
+        socket_data = self._get_socket_data()
+        if socket_data:
+            type_id = socket_data.get("connector_type_id", self._connector_type_id)
+            return {
+                "socket_id": socket_data.get("id"),
+                "connector_type_id": type_id,
+                "connector_type": CONNECTOR_TYPES.get(type_id, f"Tipo {type_id}"),
+            }
+        return {}
