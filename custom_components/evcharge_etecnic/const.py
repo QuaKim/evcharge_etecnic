@@ -12,3 +12,18 @@ STATUS_MAP = {
     3: "Fuera de Servicio",
     9: "No disponible" 
 }
+
+CONNECTOR_TYPES = {
+    1: "CHAdeMO",
+    2: "Type 2 (Mennekes)",
+    3: "CCS2",
+    5: "Schuko (Doméstico)",
+}
+
+# Iconos MDI según el tipo de conector
+CONNECTOR_ICONS = {
+    1: "mdi:ev-plug-chademo",
+    2: "mdi:ev-plug-type2",
+    3: "mdi:ev-plug-ccs2",
+    5: "mdi:power-socket-eu",
+}
