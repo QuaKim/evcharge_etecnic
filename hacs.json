@@ -1,4 +1,5 @@
 {
+  "domain": "evcharge_etecnic",
   "name": "EV Charge - ETecnic",
-  "render_readme": true
+  ...
 }
