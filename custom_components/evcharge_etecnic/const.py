@@ -17,13 +17,17 @@ CONNECTOR_TYPES = {
     1: "CHAdeMO",
     2: "Type 2 (Mennekes)",
     3: "CCS2",
+    4: "Type 1 (Yazaki)",
     5: "Schuko (Doméstico)",
+    6: "Industrial (CETAC)",
+    7: "Tesla / NACS",
 }
 
-# Iconos MDI según el tipo de conector
 CONNECTOR_ICONS = {
     1: "mdi:ev-plug-chademo",
     2: "mdi:ev-plug-type2",
     3: "mdi:ev-plug-ccs2",
+    4: "mdi:ev-plug-type1",
     5: "mdi:power-socket-eu",
-}
+    6: "mdi:power-plug",
+    7: "mdi:ev-plug-tesla",
