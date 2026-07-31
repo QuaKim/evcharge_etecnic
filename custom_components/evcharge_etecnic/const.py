@@ -9,6 +9,6 @@ CONF_STATION_ID = "station_id"
 STATUS_MAP = {
     0: "Disponible",
     1: "Ocupado",
-    3: "Fuera de Servicio"
+    3: "Fuera de Servicio",
     9: "No disponible" 
 }
