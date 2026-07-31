@@ -31,3 +31,4 @@ CONNECTOR_ICONS = {
     5: "mdi:power-socket-eu",
     6: "mdi:power-plug",
     7: "mdi:ev-plug-tesla",
+}
