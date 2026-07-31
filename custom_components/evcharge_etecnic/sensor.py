@@ -8,7 +8,7 @@ from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import CONF_STATION_NAME, DOMAIN, STATUS_MAP
+from .const import CONF_STATION_NAME, CONNECTOR_ICONS, CONNECTOR_TYPES, DOMAIN, STATUS_MAP
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -141,7 +141,6 @@ class EVchargeStationSensor(EVchargeBaseSensor):
             "sockets_count": len(data.get("charger_sockets", [])),
         }
 
-
 class EVchargeSocketSensor(EVchargeBaseSensor):
     """Sensor para cada toma de corriente independiente."""
 
@@ -152,32 +151,31 @@ class EVchargeSocketSensor(EVchargeBaseSensor):
         station_name: str,
         station_id: str,
         socket_num: int,
+        connector_type_id: int = None,
     ) -> None:
         super().__init__(coordinator, entry, station_name, station_id)
         self._socket_num = socket_num
-        self._attr_name = f"Toma {socket_num}"
+        self._connector_type_id = connector_type_id
+
+        conn_name = CONNECTOR_TYPES.get(connector_type_id) if connector_type_id else None
+        suffix = f" ({conn_name})" if conn_name else ""
+
+        self._attr_name = f"Toma {socket_num}{suffix}"
         self._attr_unique_id = f"evcharge_{self._station_id}_socket_{socket_num}"
-        self._attr_icon = "mdi:power-plug-charging"
 
     @property
-    def native_value(self):
+    def icon(self):
+        """Devuelve el icono adecuado según el tipo de conector y el estado."""
         data = self._get_station_data()
+        type_id = self._connector_type_id
+
+        # Intentamos obtener el type_id fresco si el sensor ya tiene datos del coordinador
         if data:
             sockets = data.get("charger_sockets", [])
             for s in sockets:
                 if s.get("socket_number") == self._socket_num:
-                    return STATUS_MAP.get(s.get("status"), "Desconocido")
-        return "Desconocido"
+                    type_id = s.get("connector_type_id", self._connector_type_id)
+                    break
 
-    @property
-    def extra_state_attributes(self):
-        data = self._get_station_data()
-        if data:
-            sockets = data.get("charger_sockets", [])
-            for s in sockets:
-                if s.get("socket_number") == self._socket_num:
-                    return {
-                        "socket_id": s.get("id"),
-                        "connector_type_id": s.get("connector_type_id"),
-                    }
-        return {}
+        # Devuelve el icono del conector o un icono de enchufe de carga por defecto
+        return CONNECTOR_ICONS.get(type_id, "mdi:power-plug-charging")
