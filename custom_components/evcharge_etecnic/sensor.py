@@ -4,12 +4,19 @@ import logging
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import CONF_STATION_ID, CONF_STATION_NAME, DOMAIN
+from .const import CONF_STATION_NAME, DOMAIN, STATUS_MAP
 
 _LOGGER = logging.getLogger(__name__)
+
+# Intentamos importar CONF_STATION_ID por si existe en const.py, si no, usamos fallback
+try:
+    from .const import CONF_STATION_ID
+except ImportError:
+    CONF_STATION_ID = "station_id"
 
 
 async def async_setup_entry(
@@ -17,57 +24,160 @@ async def async_setup_entry(
     entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Configura los sensores a partir de la entrada y el coordinator."""
-    # Recuperamos el coordinator que guardó __init__.py
+    """Configura los sensores a partir de la entrada de configuración."""
     coordinator = hass.data[DOMAIN][entry.entry_id]
-    
-    station_id = entry.data[CONF_STATION_ID]
-    station_name = entry.data[CONF_STATION_NAME]
 
-    # Añadimos el sensor pasando el coordinator
-    async_add_entities([EVchargeStatusSensor(coordinator, station_id, station_name)])
+    station_name = entry.data.get(CONF_STATION_NAME, "")
+    station_id = entry.data.get(CONF_STATION_ID)
+
+    # Buscar la estación en los datos del coordinador
+    station_data = None
+    for item in coordinator.data or []:
+        item_id = str(item.get("id", ""))
+        item_name = item.get("name", "").strip()
+
+        # Si tenemos station_id, buscamos por ID. Si no, por coincidencia de nombre.
+        if station_id and str(station_id) == item_id:
+            station_data = item
+            break
+        elif station_name and station_name.lower() in item_name.lower():
+            station_data = item
+            break
+
+    if not station_data:
+        _LOGGER.warning(
+            "No se encontraron datos en el JSON para la estación: %s (ID: %s)",
+            station_name,
+            station_id,
+        )
+        return
+
+    # Extraer ID y Nombre reales del JSON
+    real_id = str(station_data.get("id", entry.entry_id))
+    real_name = station_data.get("name", station_name or f"Estación {real_id}")
+
+    entities = []
+
+    # 1. Sensor principal del estado global
+    entities.append(
+        EVchargeStationSensor(coordinator, entry, real_name, real_id)
+    )
+
+    # 2. Sensores por cada toma / socket
+    for socket in station_data.get("charger_sockets", []):
+        socket_num = socket.get("socket_number", 1)
+        entities.append(
+            EVchargeSocketSensor(
+                coordinator, entry, real_name, real_id, socket_num
+            )
+        )
+
+    async_add_entities(entities)
 
 
-class EVchargeStatusSensor(CoordinatorEntity, SensorEntity):
-    """Representa el estado del cargador usando el DataUpdateCoordinator."""
+class EVchargeBaseSensor(CoordinatorEntity, SensorEntity):
+    """Clase base para los sensores de EVcharge."""
 
-    def __init__(self, coordinator, station_id: str, station_name: str) -> None:
-        """Inicializa la entidad conectada al coordinator."""
+    def __init__(
+        self, coordinator, entry: ConfigEntry, station_name: str, station_id: str
+    ) -> None:
+        """Inicializa el sensor base."""
         super().__init__(coordinator)
-        self._station_id = str(station_id)
-        
-        # Propiedades visuales del sensor
-        self._attr_name = f"{station_name} Estado"
-        self._attr_unique_id = f"evcharge_{station_id}_status"
+        self._entry = entry
+        self._station_name = station_name
+        self._station_id = station_id
+
+    @property
+    def device_info(self) -> DeviceInfo:
+        """Asigna la entidad al Dispositivo correspondiente en la interfaz."""
+        return DeviceInfo(
+            identifiers={(DOMAIN, str(self._station_id))},
+            name=f"EVcharge {self._station_name}",
+            manufacturer="Etecnic / EVcharge",
+            model="Punto de Recarga EV",
+        )
+
+    def _get_station_data(self):
+        """Busca los datos actualizados de la estación en el coordinador."""
+        for item in self.coordinator.data or []:
+            if str(item.get("id")) == str(self._station_id):
+                return item
+            elif self._station_name.lower() in item.get("name", "").lower():
+                return item
+        return None
+
+
+class EVchargeStationSensor(EVchargeBaseSensor):
+    """Sensor principal del estado global del cargador."""
+
+    def __init__(
+        self, coordinator, entry: ConfigEntry, station_name: str, station_id: str
+    ) -> None:
+        super().__init__(coordinator, entry, station_name, station_id)
+        self._attr_name = "Estado Global"
+        self._attr_unique_id = f"evcharge_{self._station_id}_main"
         self._attr_icon = "mdi:ev-station"
 
     @property
-    def native_value(self) -> str:
-        """Devuelve el estado buscando el ID de la estación en los datos del coordinator."""
-        if not self.coordinator.data:
-            return "Sin datos"
-
-        # Buscamos la estación dentro de la lista devuelta por el JSON
-        for item in self.coordinator.data:
-            if str(item.get("id")) == self._station_id:
-                return item.get("status", "OK")
-
-        return "No encontrada"
+    def native_value(self):
+        data = self._get_station_data()
+        if data:
+            status_code = data.get("status", 9)
+            return STATUS_MAP.get(status_code, "Desconocido")
+        return "Desconocido"
 
     @property
-    def extra_state_attributes(self) -> dict:
-        """Devuelve atributos adicionales de la estación."""
-        if not self.coordinator.data:
+    def extra_state_attributes(self):
+        data = self._get_station_data()
+        if not data:
             return {}
+        return {
+            "id": data.get("id"),
+            "address": data.get("address"),
+            "power_amps": data.get("power"),
+            "phases": data.get("phases"),
+            "latitude": data.get("lat"),
+            "longitude": data.get("lon"),
+            "sockets_count": len(data.get("charger_sockets", [])),
+        }
 
-        for item in self.coordinator.data:
-            if str(item.get("id")) == self._station_id:
-                return {
-                    "id": item.get("id"),
-                    "name": item.get("name"),
-                    "latitude": item.get("lat"),
-                    "longitude": item.get("lng"),
-                    "connectors": item.get("connectors", []),
-                }
 
+class EVchargeSocketSensor(EVchargeBaseSensor):
+    """Sensor para cada toma de corriente independiente."""
+
+    def __init__(
+        self,
+        coordinator,
+        entry: ConfigEntry,
+        station_name: str,
+        station_id: str,
+        socket_num: int,
+    ) -> None:
+        super().__init__(coordinator, entry, station_name, station_id)
+        self._socket_num = socket_num
+        self._attr_name = f"Toma {socket_num}"
+        self._attr_unique_id = f"evcharge_{self._station_id}_socket_{socket_num}"
+        self._attr_icon = "mdi:power-plug-charging"
+
+    @property
+    def native_value(self):
+        data = self._get_station_data()
+        if data:
+            sockets = data.get("charger_sockets", [])
+            for s in sockets:
+                if s.get("socket_number") == self._socket_num:
+                    return STATUS_MAP.get(s.get("status"), "Desconocido")
+        return "Desconocido"
+
+    @property
+    def extra_state_attributes(self):
+        data = self._get_station_data()
+        if data:
+            sockets = data.get("charger_sockets", [])
+            for s in sockets:
+                if s.get("socket_number") == self._socket_num:
+                    return {
+                        "socket_id": s.get("id"),
+                        "connector_type_id": s.get("connector_type_id"),
+                    }
         return {}
