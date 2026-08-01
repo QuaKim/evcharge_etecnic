@@ -1,9 +1,5 @@
 # EVcharge (Etecnic) — Integración para Home Assistant
 
-[![GitHub Release](https://img.shields.io/github/v/release/usuario/evcharge-ha?style=flat-square&color=blue)](https://github.com/usuario/evcharge-ha/releases)
-[![HACS Default](https://img.shields.io/badge/HACS-Custom-orange.style=flat-square)](https://hacs.xyz/)
-[![Validate Domain](https://img.shields.io/badge/Home%20Assistant-2024.1%2B-blue.svg?style=flat-square)](https://www.home-assistant.io/)
-[![License](https://img.shields.io/github/license/usuario/evcharge-ha?style=flat-square)](LICENSE)
 
 > ⚠️ **Aviso de exención de responsabilidad (Disclaimer)**  
 > Esta es una **integración no oficial** desarrollada por la comunidad. No está afiliada, respaldada ni asociada oficialmente con **Etecnic** ni con **EVcharge**.
@@ -104,23 +100,33 @@ Cada sensor expone en sus atributos información extendida de la toma:
 ##  ⚙️ Pasos para añadir y configurar Puntos de Carga
 
 Una vez instalada la integración y reiniciado Home Assistant, sigue estos pasos para vincular tu cuenta y añadir tus estaciones:
-Ve a Ajustes → Dispositivos y servicios.
-Haz clic en el botón Añadir integración (abajo a la derecha).
-Busca EVcharge (Etecnic) y selecciónala.
-Introduce tus datos de acceso a la plataforma EVcharge si es necesario (Usuario/Email y Contraseña).
-Añadir un punto de carga: Escribe el Nombre del cargador o su ID de estación en el campo correspondiente para localizar el punto que deseas vincular.
-(Pondrás la captura aquí)
-Pulsa Enviar. La integración conectará con la API de EVcharge para añadir la estación.
+
+1. Ve a Ajustes → Dispositivos y servicios.
+2. Haz clic en el botón Añadir integración (abajo a la derecha).
+3. Busca EVcharge (Etecnic) y selecciónala.
+
+Añadir un punto de carga: 
+
+1. Escribe el Nombre del cargador o su ID de estación en el campo correspondiente para localizar el punto que deseas vincular.
+2. Pulsa Enviar. La integración conectará con la API de EVcharge para añadir la estación.
+
 El cargador aparecerá registrado como un nuevo Dispositivo, identificado con su Nombre, Calle e ID, e incluirá los sensores de sus tomas (Toma 1, Toma 2, etc.).
-🔄 Nota sobre la nomenclatura de sensores
+
+##  🔄 Nota sobre la nomenclatura de sensores
+
 A partir de la versión v0.1.1, los sensores usan el nombre simplificado Toma X (delegando el tipo de conector al icono dinámico MDI).
 
 Si tenías la versión v0.1.0 instalada:
-Recomendado: Elimina la integración en Dispositivos y servicios y vuelve a añadirla para aplicar los nombres limpios automáticamente.
-Alternativa: Renombra manualmente las entidades desde la propia interfaz de HA.
-🤝 Contribuciones y Soporte
+
+- Recomendado: Elimina la integración en Dispositivos y servicios y vuelve a añadirla para aplicar los nombres limpios automáticamente.
+- Alternativa: Renombra manualmente las entidades desde la propia interfaz de HA.
+
+## 🤝 Contribuciones y Soporte
+
 ¡Cualquier reporte de errores, ideas o mejoras son bienvenidos!
 Reportar un fallo o sugerencia: Abre un Issue en GitHub.
 Aportar código: Envía una Pull Request.
-📄 Licencia
+
+## 📄 Licencia
+
 Este proyecto está bajo la licencia MIT. Consulta el archivo LICENSE para más información
