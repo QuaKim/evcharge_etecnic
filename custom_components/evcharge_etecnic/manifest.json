@@ -1,7 +1,7 @@
 {
   "domain": "evcharge_etecnic",
   "name": "EVcharge (Etecnic)",
-  "codeowners": ["@tu_usuario_github"],
+  "codeowners": ["@QuaKim"],
   "config_flow": true,
   "documentation": "https://github.com/tu_usuario_github/evcharge_etecnic",
   "iot_class": "cloud_polling",
