@@ -165,7 +165,7 @@ class EVchargeSocketSensor(EVchargeBaseSensor):
 #        conn_name = CONNECTOR_TYPES.get(connector_type_id) if connector_type_id else None
 #        suffix = f" ({conn_name})" if conn_name else ""
 
-        self._attr_name = f"Toma {self._socket_num}{suffix}"
+        self._attr_name = f"Toma {self._socket_num}"
         self._attr_unique_id = f"evcharge_{self._station_id}_socket_{self._socket_num}"
 
     def _get_socket_data(self):
