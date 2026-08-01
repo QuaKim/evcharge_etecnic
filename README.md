@@ -12,7 +12,9 @@
 
 ## 🚗 Descripción de la Integración
 
-La integración **EVcharge (Etecnic)** conecta Home Assistant con la plataforma de carga de vehículos eléctricos de Etecnic / EVcharge. Permite monitorizar en tiempo real el estado de funcionamiento, la disponibilidad de las tomas y los detalles técnicos de cada punto de carga registrado en tu cuenta de usuario.
+La integración **EVcharge (Etecnic)** conecta Home Assistant con la plataforma de infraestructura y carga de vehículos eléctricos de Etecnic / EVcharge. 
+
+Es de **gran utilidad para usuarios que hacen un uso frecuente de cargadores públicos o gestionan varias estaciones a la vez**, ya que permite consultar de un solo vistazo el estado global de múltiples puntos de recarga y sus tomas en una misma pantalla, evitando la molestia de tener que navegar uno a uno dentro de la app móvil oficial.
 
 Está pensada para ofrecer una experiencia nativa y limpia, creando **un dispositivo por cada estación de recarga** y agrupando dentro de él sus sensores independientes.
 
@@ -58,6 +60,26 @@ Cada sensor expone en sus atributos información extendida de la toma:
 4. En **URL**, pega la dirección de tu repositorio en GitHub:
    `https://github.com/TU_USUARIO/TU_REPOSITORIO`
 5. En **Categoría**, selecciona **Integración**.
+6. Haz clic en **Añadir**.
+7. Busca **EVcharge (Etecnic)** en la lista de HACS y pulsa **Descargar**.
+8. **Reinicia Home Assistant**.
+
+---
+
+### Opción 2: Instalación Manual
+
+1. Descarga la última versión comprimida desde la sección [Releases](https://github.com/TU_USUARIO/TU_REPOSITORIO/releases).
+2. Extrae el contenido y copia la carpeta `evcharge` en el directorio `custom_components` de tu servidor de Home Assistant:
+   ```text
+   config/
+   └── custom_components/
+       └── evcharge/
+           ├── __init__.py
+           ├── config_flow.py
+           ├── const.py
+           ├── manifest.json
+           ├── sensor.py
+           └── ...5. En **Categoría**, selecciona **Integración**.
 6. Haz clic en **Añadir**.
 7. Busca **EVcharge (Etecnic)** en la lista de HACS y pulsa **Descargar**.
 8. **Reinicia Home Assistant**.
