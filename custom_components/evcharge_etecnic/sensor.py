@@ -95,9 +95,9 @@ class EVchargeBaseSensor(CoordinatorEntity, SensorEntity):
         """Asigna la entidad al Dispositivo correspondiente en la interfaz."""
         return DeviceInfo(
             identifiers={(DOMAIN, str(self._station_id))},
-            name=f"EVcharge {self._station_name}",
+            name=f"EVcharge {self._station_name} (ID: {self._station_id})",
             manufacturer="Etecnic / EVcharge",
-            model="Punto de Recarga EV",
+            model=f"Estación de Carga: {self._station_id}",
         )
 
     def _get_station_data(self):
