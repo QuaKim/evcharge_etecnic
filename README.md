@@ -101,7 +101,7 @@ Cada sensor expone en sus atributos información extendida de la toma:
            ├── sensor.py
            └── ...
 
-⚙️ Pasos para añadir y configurar Puntos de Carga
+##  ⚙️ Pasos para añadir y configurar Puntos de Carga
 
 Una vez instalada la integración y reiniciado Home Assistant, sigue estos pasos para vincular tu cuenta y añadir tus estaciones:
 Ve a Ajustes → Dispositivos y servicios.
