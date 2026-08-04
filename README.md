@@ -43,9 +43,9 @@ Cada sensor expone en sus atributos información extendida de la toma:
 
 ## 📸 Capturas de pantalla
 
-| Configuración vía UI | Ficha de Dispositivo y Sensores |
-| :---: | :---: |
-| ![Descripción de la imagen](/assets/evcharge_shoot1.png) | ![Dashboard Sensores](https://via.placeholder.com/400x250.png?text=Dispositivo+y+Tomas+HA) |
+Ficha de Dispositivo y Sensores |
+ :---: |
+| ![Descripción de la imagen](/assets/evcharge_shoot1.png) |
 
 *(Nota: Puedes reemplazar estas imágenes subiendo capturas reales a tu repositorio).*
 
