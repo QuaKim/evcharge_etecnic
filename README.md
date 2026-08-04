@@ -1,4 +1,4 @@
-<div align="center">
+
 
 [![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange.svg?style=flat-square)](https://github.com/hacs/integration)
 [![Hacs Validation](https://github.com/QuaKim/evcharge_etecnic/actions/workflows/hacs.yml/badge.svg)](https://github.com/QuaKim/evcharge_etecnic/actions/workflows/hacs.yml)
@@ -6,9 +6,7 @@
 [![Total Downloads](https://img.shields.io/github/downloads/QuaKim/evcharge_etecnic/total?style=flat-square)](https://github.com/QuaKim/evcharge_etecnic/releases)
 [![License](https://img.shields.io/github/license/QuaKim/evcharge_etecnic?style=flat-square)](https://github.com/QuaKim/evcharge_etecnic/blob/main/LICENSE)
 
-</div>
 # EVcharge (Etecnic) — Integración para Home Assistant
-
 
 > ⚠️ **Aviso de exención de responsabilidad (Disclaimer)**  
 > Esta es una **integración no oficial** desarrollada por la comunidad. No está afiliada, respaldada ni asociada oficialmente con **Etecnic** ni con **EVcharge**.
@@ -63,7 +61,7 @@ Cada sensor expone en sus atributos información extendida de la toma:
 2. Haz clic en **Integraciones**.
 3. Pulsa el menú de tres puntos `⋮` (arriba a la derecha) y selecciona **Repositorios personalizados**.
 4. En **URL**, pega la dirección de tu repositorio en GitHub:
-   `https://github.com/TU_USUARIO/TU_REPOSITORIO`
+   https://github.com/QuaKim/evcharge_etecnic/releases
 5. En **Categoría**, selecciona **Integración**.
 6. Haz clic en **Añadir**.
 7. Busca **EVcharge (Etecnic)** en la lista de HACS y pulsa **Descargar**.
@@ -73,7 +71,7 @@ Cada sensor expone en sus atributos información extendida de la toma:
 
 ### Opción 2: Instalación Manual
 
-1. Descarga la última versión comprimida desde la sección [Releases](https://github.com/TU_USUARIO/TU_REPOSITORIO/releases).
+1. Descarga la última versión comprimida desde la sección [Releases](https://github.com/QuaKim/evcharge_etecnic/releases).
 2. Extrae el contenido y copia la carpeta `evcharge` en el directorio `custom_components` de tu servidor de Home Assistant:
    ```text
    config/
@@ -116,19 +114,11 @@ Una vez instalada la integración y reiniciado Home Assistant, sigue estos pasos
 
 Añadir un punto de carga: 
 
-1. Escribe el Nombre del cargador o su ID de estación en el campo correspondiente para localizar el punto que deseas vincular.
+1. Escribe el Nombre del cargador o su ID de estación, que aparece en la aplicación de Android/iOS, en el campo correspondiente para localizar el punto que deseas vincular.
 2. Pulsa Enviar. La integración conectará con la API de EVcharge para añadir la estación.
 
 El cargador aparecerá registrado como un nuevo Dispositivo, identificado con su Nombre, Calle e ID, e incluirá los sensores de sus tomas (Toma 1, Toma 2, etc.).
 
-##  🔄 Nota sobre la nomenclatura de sensores
-
-A partir de la versión v0.1.1, los sensores usan el nombre simplificado Toma X (delegando el tipo de conector al icono dinámico MDI).
-
-Si tenías la versión v0.1.0 instalada:
-
-- Recomendado: Elimina la integración en Dispositivos y servicios y vuelve a añadirla para aplicar los nombres limpios automáticamente.
-- Alternativa: Renombra manualmente las entidades desde la propia interfaz de HA.
 
 ## 🤝 Contribuciones y Soporte
 
