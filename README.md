@@ -1,5 +1,3 @@
-
-
 [![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange.svg?style=flat-square)](https://github.com/hacs/integration)
 [![Hacs Validation](https://github.com/QuaKim/evcharge_etecnic/actions/workflows/hacs.yml/badge.svg)](https://github.com/QuaKim/evcharge_etecnic/actions/workflows/hacs.yml)
 [![GitHub Release](https://img.shields.io/github/v/release/QuaKim/evcharge_etecnic?style=flat-square)](https://github.com/QuaKim/evcharge_etecnic/releases)
@@ -55,13 +53,14 @@ Cada sensor expone en sus atributos información extendida de la toma:
 
 ## 📦 Instalación
 
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=QuaKim&repository=evcharge_etecnic&category=integration)
+
 ### Opción 1: A través de HACS (Recomendado)
 
 1. Abre **HACS** en el menú lateral de Home Assistant.
 2. Haz clic en **Integraciones**.
 3. Pulsa el menú de tres puntos `⋮` (arriba a la derecha) y selecciona **Repositorios personalizados**.
-4. En **URL**, pega la dirección de tu repositorio en GitHub:
-   https://github.com/QuaKim/evcharge_etecnic/releases
+4. En **URL**, pega la dirección de tu repositorio en GitHub: https://github.com/QuaKim/evcharge_etecnic/  
 5. En **Categoría**, selecciona **Integración**.
 6. Haz clic en **Añadir**.
 7. Busca **EVcharge (Etecnic)** en la lista de HACS y pulsa **Descargar**.
@@ -71,7 +70,7 @@ Cada sensor expone en sus atributos información extendida de la toma:
 
 ### Opción 2: Instalación Manual
 
-1. Descarga la última versión comprimida desde la sección [Releases](https://github.com/QuaKim/evcharge_etecnic/releases).
+1. Descarga la última versión comprimida desde la sección: 
 2. Extrae el contenido y copia la carpeta `evcharge` en el directorio `custom_components` de tu servidor de Home Assistant:
    ```text
    config/
@@ -91,7 +90,7 @@ Cada sensor expone en sus atributos información extendida de la toma:
 
 ### Opción 2: Instalación Manual
 
-1. Descarga la última versión comprimida desde la sección [Releases](https://github.com/TU_USUARIO/TU_REPOSITORIO/releases).
+1. Descarga la última versión comprimida desde la sección: https://github.com/QuaKim/evcharge_etecnic/
 2. Extrae el contenido y copia la carpeta `evcharge` en el directorio `custom_components` de tu servidor de Home Assistant:
    ```text
    config/
