@@ -1,3 +1,12 @@
+<div align="center">
+
+[![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange.svg?style=flat-square)](https://github.com/hacs/integration)
+[![Hacs Validation](https://github.com/QuaKim/evcharge_etecnic/actions/workflows/hacs.yml/badge.svg)](https://github.com/QuaKim/evcharge_etecnic/actions/workflows/hacs.yml)
+[![GitHub Release](https://img.shields.io/github/v/release/QuaKim/evcharge_etecnic?style=flat-square)](https://github.com/QuaKim/evcharge_etecnic/releases)
+[![Total Downloads](https://img.shields.io/github/downloads/QuaKim/evcharge_etecnic/total?style=flat-square)](https://github.com/QuaKim/evcharge_etecnic/releases)
+[![License](https://img.shields.io/github/license/QuaKim/evcharge_etecnic?style=flat-square)](https://github.com/QuaKim/evcharge_etecnic/blob/main/LICENSE)
+
+</div>
 # EVcharge (Etecnic) — Integración para Home Assistant
 
 
