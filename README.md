@@ -47,8 +47,6 @@ Ficha de Dispositivo y Sensores |
  :---: |
 | ![Descripción de la imagen](/assets/evcharge_shoot1.png) |
 
-*(Nota: Puedes reemplazar estas imágenes subiendo capturas reales a tu repositorio).*
-
 ---
 
 ## 📦 Instalación
