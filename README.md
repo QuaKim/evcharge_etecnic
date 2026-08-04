@@ -75,7 +75,7 @@ Cada sensor expone en sus atributos información extendida de la toma:
    ```text
    config/
    └── custom_components/
-       └── evcharge/
+       └── evcharge_etecnic/
            ├── __init__.py
            ├── config_flow.py
            ├── const.py
@@ -88,20 +88,6 @@ Cada sensor expone en sus atributos información extendida de la toma:
 
 ---
 
-### Opción 2: Instalación Manual
-
-1. Descarga la última versión comprimida desde la sección: https://github.com/QuaKim/evcharge_etecnic/
-2. Extrae el contenido y copia la carpeta `evcharge` en el directorio `custom_components` de tu servidor de Home Assistant:
-   ```text
-   config/
-   └── custom_components/
-       └── evcharge/
-           ├── __init__.py
-           ├── config_flow.py
-           ├── const.py
-           ├── manifest.json
-           ├── sensor.py
-           └── ...
 
 ##  ⚙️ Pasos para añadir y configurar Puntos de Carga
 
