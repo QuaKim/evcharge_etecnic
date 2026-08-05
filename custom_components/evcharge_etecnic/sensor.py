@@ -1,14 +1,23 @@
 """Plataforma de sensores para EVcharge (Etecnic)."""
+
 import logging
 
-from homeassistant.components.sensor import SensorEntity
+from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import UnitOfTime
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
+from homeassistant.util import dt as dt_util
 
-from .const import CONF_STATION_NAME, CONNECTOR_ICONS, CONNECTOR_TYPES, DOMAIN, STATUS_MAP
+from .const import (
+    CONF_STATION_NAME,
+    CONNECTOR_ICONS,
+    CONNECTOR_TYPES,
+    DOMAIN,
+    STATUS_MAP,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -63,14 +72,31 @@ async def async_setup_entry(
         EVchargeStationSensor(coordinator, entry, real_name, real_id)
     )
 
-    # 2. Sensores por cada toma / socket
+    # 2. Sensores por cada toma / socket (Estado y Tiempo)
     for socket in station_data.get("charger_sockets", []):
         socket_num = socket.get("socket_number", 1)
         connector_type_id = socket.get("connector_type_id")
-        
+
+        # Sensor de estado de la toma
         entities.append(
             EVchargeSocketSensor(
-                coordinator, entry, real_name, real_id, socket_num, connector_type_id
+                coordinator,
+                entry,
+                real_name,
+                real_id,
+                socket_num,
+                connector_type_id,
+            )
+        )
+
+        # Sensor de tiempo transcurrido de la toma
+        entities.append(
+            EVchargeSocketDurationSensor(
+                coordinator,
+                entry,
+                real_name,
+                real_id,
+                socket_num,
             )
         )
 
@@ -82,7 +108,11 @@ class EVchargeBaseSensor(CoordinatorEntity, SensorEntity):
     """Clase base para los sensores de EVcharge."""
 
     def __init__(
-        self, coordinator, entry: ConfigEntry, station_name: str, station_id: str
+        self,
+        coordinator,
+        entry: ConfigEntry,
+        station_name: str,
+        station_id: str,
     ) -> None:
         """Inicializa el sensor base."""
         super().__init__(coordinator)
@@ -114,7 +144,11 @@ class EVchargeStationSensor(EVchargeBaseSensor):
     """Sensor principal del estado global del cargador."""
 
     def __init__(
-        self, coordinator, entry: ConfigEntry, station_name: str, station_id: str
+        self,
+        coordinator,
+        entry: ConfigEntry,
+        station_name: str,
+        station_id: str,
     ) -> None:
         super().__init__(coordinator, entry, station_name, station_id)
         self._attr_name = "Estado Global"
@@ -161,12 +195,10 @@ class EVchargeSocketSensor(EVchargeBaseSensor):
         self._socket_num = int(socket_num)
         self._connector_type_id = connector_type_id
 
-# Indicaba tipo de connector en entidad.
-#        conn_name = CONNECTOR_TYPES.get(connector_type_id) if connector_type_id else None
-#        suffix = f" ({conn_name})" if conn_name else ""
-
         self._attr_name = f"Toma {self._socket_num}"
-        self._attr_unique_id = f"evcharge_{self._station_id}_socket_{self._socket_num}"
+        self._attr_unique_id = (
+            f"evcharge_{self._station_id}_socket_{self._socket_num}"
+        )
 
     def _get_socket_data(self):
         """Método auxiliar para obtener la información específica de esta toma."""
@@ -203,10 +235,79 @@ class EVchargeSocketSensor(EVchargeBaseSensor):
         """Devuelve los atributos extra de la toma."""
         socket_data = self._get_socket_data()
         if socket_data:
-            type_id = socket_data.get("connector_type_id", self._connector_type_id)
+            type_id = socket_data.get(
+                "connector_type_id", self._connector_type_id
+            )
             return {
                 "socket_id": socket_data.get("id"),
                 "connector_type_id": type_id,
-                "connector_type": CONNECTOR_TYPES.get(type_id, f"Tipo {type_id}"),
+                "connector_type": CONNECTOR_TYPES.get(
+                    type_id, f"Tipo {type_id}"
+                ),
             }
         return {}
+
+
+class EVchargeSocketDurationSensor(EVchargeBaseSensor):
+    """Sensor que calcula los minutos transcurridos en uso/carga por toma."""
+
+    _attr_device_class = SensorDeviceClass.DURATION
+    _attr_native_unit_of_measurement = UnitOfTime.MINUTES
+    _attr_icon = "mdi:timer-outline"
+
+    def __init__(
+        self,
+        coordinator,
+        entry: ConfigEntry,
+        station_name: str,
+        station_id: str,
+        socket_num: int,
+    ) -> None:
+        super().__init__(coordinator, entry, station_name, station_id)
+        self._socket_num = int(socket_num)
+
+        self._attr_name = f"Toma {self._socket_num} Tiempo"
+        self._attr_unique_id = (
+            f"evcharge_{self._station_id}_socket_{self._socket_num}_duration"
+        )
+
+        self._last_status = None
+        self._state_start_time = None
+
+    def _get_socket_data(self):
+        """Obtiene la información actualizada del socket."""
+        station_data = self._get_station_data()
+        if station_data:
+            sockets = station_data.get("charger_sockets", [])
+            for s in sockets:
+                if int(s.get("socket_number", 0)) == self._socket_num:
+                    return s
+        return None
+
+    @property
+    def native_value(self) -> int:
+        """Calcula la duración en minutos cuando la toma está en uso o cargando."""
+        socket_data = self._get_socket_data()
+        if not socket_data:
+            return 0
+
+        status_code = socket_data.get("status")
+        current_status_name = STATUS_MAP.get(status_code, "Desconocido")
+
+        # Detectar cuando cambia el estado para reiniciar el temporizador
+        if current_status_name != self._last_status:
+            self._last_status = current_status_name
+            self._state_start_time = dt_util.now()
+
+        # Si está libre/disponible o desconectada, devolvemos 0 min
+        if not self._state_start_time or current_status_name in (
+            "Disponible",
+            "Desconectado",
+            "Desconocido",
+            None,
+        ):
+            return 0
+
+        # Si está cargando o en uso, calculamos la diferencia en minutos
+        elapsed = dt_util.now() - self._state_start_time
+        return int(elapsed.total_seconds() // 60)
