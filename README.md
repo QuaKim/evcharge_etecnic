@@ -14,7 +14,7 @@
 
 La integración **EVcharge (Etecnic)** conecta Home Assistant con la plataforma de infraestructura y carga de vehículos eléctricos de Etecnic / EVcharge. 
 
-Es de **gran utilidad para usuarios que hacen un uso frecuente de cargadores públicos o gestionan varias estaciones a la vez**, ya que permite consultar de un solo vistazo el estado global de múltiples puntos de recarga y sus tomas en una misma pantalla, evitando la molestia de tener que navegar uno a uno dentro de la app móvil oficial.
+Es de **gran utilidad para usuarios que hacen un uso frecuente de cargadores públicos o**, ya que permite consultar de un solo vistazo el estado global de múltiples puntos de recarga y sus tomas en una misma pantalla, evitando la molestia de tener que navegar uno a uno dentro de la app móvil oficial.
 
 Está pensada para ofrecer una experiencia nativa y limpia, creando **un dispositivo por cada estación de recarga** y agrupando dentro de él sus sensores independientes.
 
