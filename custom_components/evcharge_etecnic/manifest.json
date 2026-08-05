@@ -6,6 +6,6 @@
   "documentation": "https://github.com/tu_usuario_github/evcharge_etecnic",
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/tu_usuario_github/evcharge_etecnic/issues",
-  "version": "0.1.3"
+  "version": "0.1.4"
   "logo_url": "https://raw.githubusercontent.com/QuaKim/evcharge_etecnic/main/assets/icon.png"
 }
