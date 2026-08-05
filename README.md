@@ -117,6 +117,9 @@ El cargador aparecerá registrado como un nuevo Dispositivo, identificado con su
 Reportar un fallo o sugerencia: Abre un Issue en GitHub.
 Aportar código: Envía una Pull Request.
 
+## ☕ Apoya el proyecto
+Si la integración te resulta útil y quieres apoyar su mantenimiento, ¡puedes invitarme a un café en [Ko-fi](https://ko-fi.com/QuaKim)!
+
 ## 📄 Licencia
 
 Este proyecto está bajo la licencia MIT. Consulta el archivo LICENSE para más información
