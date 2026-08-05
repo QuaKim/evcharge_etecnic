@@ -86,7 +86,8 @@ Ficha de Dispositivo y Sensores |
            ├── const.py
            ├── manifest.json
            ├── sensor.py
-           └── ...5. En **Categoría**, selecciona **Integración**.
+           └── ...
+5. En **Categoría**, selecciona **Integración**.
 6. Haz clic en **Añadir**.
 7. Busca **EVcharge (Etecnic)** en la lista de HACS y pulsa **Descargar**.
 8. **Reinicia Home Assistant**.
