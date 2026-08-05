@@ -46,6 +46,8 @@ Está pensada para ofrecer una experiencia nativa y limpia, creando **un disposi
 > <MARK>**Sobre los sensores de tiempo (`Toma X Tiempo`):**
 > La medición se calcula de forma local dentro de Home Assistant basándose en las transiciones de estado reportadas por la API de EVcharge, no se trata de un tiempo proporcionado por la propia API.</mark>
 
+> ⚠️ **Comportamiento en reinicios:** Dado que el tiempo transcurrido se gestiona en la memoria local de Home Assistant, si el sistema se reinicia durante una sesión de carga activa, **el contador de tiempo se reiniciará o perderá la precisión** de esa toma en curso.
+
 ## 📸 Capturas de pantalla
 
 Ficha de Dispositivo y Sensores |
