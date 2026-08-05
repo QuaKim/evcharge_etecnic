@@ -20,25 +20,29 @@ Está pensada para ofrecer una experiencia nativa y limpia, creando **un disposi
 
 ---
 
-## ⚡ Funciones y Funcionalidades
+### ⚡ Funciones y Funcionalidades
 
-### 1. Monitorización de Estado en Tiempo Real
-- **Estado de las tomas:** Consulta al instante si una toma está `Disponible`, `Ocupada / Cargando`, `Reservada`, `Fuera de servicio` o en `Error`.
-- **Actualización automática asíncrona:** Polling en segundo plano mediante `DataUpdateCoordinator` para mantener los datos al día sin saturar la red ni ralentizar Home Assistant.
+#### 1. Monitorización de Estado y Tiempo en Tiempo Real
+* **Estado de las tomas:** Consulta al instante si una toma está *Disponible*, *Ocupada / Cargando*, *Reservada*, *Fuera de servicio* o en *Error*.
+* **Control de tiempo transcurrido (`Toma X Tiempo`):** Medición de duración local por conector para saber cuántos minutos lleva en su estado actual (ideal para crear automatizaciones de alerta por tiempo límite de carga o estacionamiento).
+* **Actualización automática asíncrona:** Polling en segundo plano mediante `DataUpdateCoordinator` para mantener los datos al día sin saturar la red ni ralentizar Home Assistant.
 
-### 2. Gestión Multiestación y Organización Visual
-- **Ficha de Dispositivo Completa:** Cada cargador se registra con su **Nombre de estación**, **Dirección / Calle** e **ID de cargador** para identificarlo fácilmente si gestionas varios puntos.
-- **Iconos Dinámicos MDI:** Identificación visual del conector (`mdi:ev-plug-ccs2`, `mdi:ev-plug-type2`, `mdi:power-socket-eu`, etc.) según el tipo de toma detectado.
-- **Nombres de Entidad Limpios:** Sensores nombrados de forma concisa (`Toma 1`, `Toma 2`) para mantener los `entity_id` breves y fáciles de usar en tarjetas o automatizaciones.
+#### 2. Gestión Multiestación y Organización Visual
+* **Ficha de Dispositivo Completa:** Cada cargador se registra con su *Nombre de estación*, *Dirección / Calle* e *ID de cargador* para identificarlo fácilmente si gestionas varios puntos.
+* **Iconos Dinámicos MDI:** Identificación visual del conector (`mdi:ev-plug-ccs2`, `mdi:ev-plug-type2`, `mdi:power-socket-eu`, etc.) y de tiempo (`mdi:timer-outline`).
+* **Nombres de Entidad Alineados:** Nomenclatura emparejada (`Toma 1` y `Toma 1 Tiempo`) diseñada para que Home Assistant agrupe y ordene automáticamente los sensores por toma en la interfaz visual.
 
-### 3. Atributos Técnicos Detallados
-Cada sensor expone en sus atributos información extendida de la toma:
-- Tipo de conector (CCS2, Type 2, CHAdeMO, etc.).
-- Potencia máxima / disponible (kW).
-- Identificadores internos de estación y conector.
-- Estado detallado devuelto por la API.
+#### 3. Atributos Técnicos y Gestión de Tiempo Local
+* **Atributos detallados por toma:** Cada sensor expone información extendida de la API:
+  * Tipo de conector (CCS2, Type 2, CHAdeMO, etc.).
+  * Potencia máxima / disponible (kW).
+  * Identificadores internos de estación y conector.
+  * Estado detallado devuelto por la API.
+* **Cálculo de tiempo local:** Los sensores de duración (`Toma X Tiempo`) calculan el tiempo transcurrido de forma autónoma dentro de Home Assistant a partir de los cambios de estado de la toma, sin realizar peticiones extra ni depender de soporte directo de la API.
 
----
+> [!NOTE]
+> <MARK>**Sobre los sensores de tiempo (`Toma X Tiempo`):**
+> La medición se calcula de forma local dentro de Home Assistant basándose en las transiciones de estado reportadas por la API de EVcharge, no se trata de un tiempo proporcionado por la propia API.</mark>
 
 ## 📸 Capturas de pantalla
 
