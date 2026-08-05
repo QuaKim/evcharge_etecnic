@@ -1,7 +1,9 @@
 [![HACS Custom](https://img.shields.io/badge/HACS-Custom-blue.svg?style=flat-square)](https://github.com/hacs/integration)
 [![GitHub Release](https://img.shields.io/github/v/release/QuaKim/evcharge_etecnic?style=flat-square)](https://github.com/QuaKim/evcharge_etecnic/releases)
-[![GitHub Stars](https://img.shields.io/github/stars/QuaKim/evcharge_etecnic?style=flat-square)](https://github.com/QuaKim/evcharge_etecnic/stargazers)
 [![License](https://img.shields.io/github/license/QuaKim/evcharge_etecnic?style=flat-square)](https://github.com/QuaKim/evcharge_etecnic/blob/main/LICENSE)
+[![Last Commit](https://img.shields.io/github/last-commit/QuaKim/evcharge_etecnic?style=flat-square)](https://github.com/QuaKim/evcharge_etecnic/commits/main)
+![Maintained](https://img.shields.io/badge/Maintained%3F-yes-brightgreen?style=flat-square)
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-Donate-yellow?style=flat-square&logo=buy-me-a-coffee)](https://www.buymeacoffee.com/TU_USUARIO)
 
 # EVcharge (Etecnic) — Integración para Home Assistant
 
