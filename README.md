@@ -71,7 +71,7 @@ Ficha de Dispositivo y Sensores |
 
 ### Opción 2: Instalación Manual
 
-1. Descarga la última versión comprimida desde la sección: 
+1. Descarga la última versión comprimida desde: https://github.com/QuaKim/evcharge_etecnic/  
 2. Extrae el contenido y copia la carpeta `evcharge` en el directorio `custom_components` de tu servidor de Home Assistant:
    ```text
    config/
