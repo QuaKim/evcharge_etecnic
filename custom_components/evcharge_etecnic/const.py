@@ -10,7 +10,8 @@ STATUS_MAP = {
     0: "Disponible",
     1: "Ocupado",
     3: "Fuera de Servicio",
-    9: "No disponible" 
+    9: "Fuera de Servicio -Error",
+    14: "Cargando" 
 }
 
 CONNECTOR_TYPES = {
