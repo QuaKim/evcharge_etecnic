@@ -1,0 +1,24 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Añadir estación EVcharge",
+        "description": "Introduce el ID numérico exacto o escribe texto (ej. parte del nombre o de la localidad/calle) para buscar.",
+        "data": {
+          "station_name": "ID o Búsqueda de estación"
+        }
+      },
+      "select_station": {
+        "title": "Seleccionar estación",
+        "description": "Se han encontrado varias estaciones. Selecciona una de la lista:"
+      }
+    },
+    "error": {
+      "not_found": "No se ha encontrado ninguna estación con ese criterio.",
+      "cannot_connect": "Error al conectar con el servidor de Etecnic."
+    },
+    "abort": {
+      "already_configured": "Esta estación ya está configurada."
+    }
+  }
+}
