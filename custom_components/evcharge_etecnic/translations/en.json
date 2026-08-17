@@ -1,0 +1,24 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Add EVcharge Station",
+        "description": "Enter the exact numeric ID or type text (e.g., part of the name or location/street) to search.",
+        "data": {
+          "station_name": "ID or Station Search"
+        }
+      },
+      "select_station": {
+        "title": "Select Station",
+        "description": "Multiple stations were found. Please select one from the list:"
+      }
+    },
+    "error": {
+      "not_found": "No stations were found matching that criteria.",
+      "cannot_connect": "Failed to connect to the Etecnic server."
+    },
+    "abort": {
+      "already_configured": "This station is already configured."
+    }
+  }
+}
