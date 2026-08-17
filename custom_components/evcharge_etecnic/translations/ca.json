@@ -1,0 +1,24 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Afegir estació EVcharge",
+        "description": "Introdueix l'ID numèric exacte o escriu text (ex. part del nom o de la localitat/carrer) per cercar.",
+        "data": {
+          "station_name": "ID o Cerca d'estació"
+        }
+      },
+      "select_station": {
+        "title": "Seleccionar estació",
+        "description": "S'han trobat diverses estacions. Selecciona'n una de la llista:"
+      }
+    },
+    "error": {
+      "not_found": "No s'ha trobat cap estació amb aquest criteri.",
+      "cannot_connect": "Error en connectar amb el servidor d'Etecnic."
+    },
+    "abort": {
+      "already_configured": "Aquesta estació ja està configurada."
+    }
+  }
+}
